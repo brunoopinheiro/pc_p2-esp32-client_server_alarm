@@ -1,13 +1,6 @@
 from flask import Flask
-from http import HTTPStatus
+from server.controllers.login_blueprint import login_blueprint
 
 
 app = Flask(__name__)
-
-
-@app.route('/login/<user>/<password>', methods=['GET'])
-def login(user: str, password: str):
-    response = "unauthorized", HTTPStatus.UNAUTHORIZED
-    if user == "test" and password == "123":
-        response = "ok", HTTPStatus.OK
-    return response
+app.register_blueprint(login_blueprint, url_prefix='/login')

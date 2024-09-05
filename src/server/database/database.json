@@ -1,0 +1,12 @@
+{
+    "users": {
+        "1": {
+            "password": "@strongP4ssw0rD",
+            "username": "Developer"
+        },
+        "2": {
+            "password": "@strongP4ssw0rD",
+            "username": "Developer"
+        }
+    }
+}

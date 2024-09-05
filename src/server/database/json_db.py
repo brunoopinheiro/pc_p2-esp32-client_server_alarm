@@ -1,4 +1,4 @@
-from src.server.database.abstract_db import Database
+from server.database.abstract_db import Database
 from json import load, dumps
 from pathlib import Path
 
@@ -27,7 +27,7 @@ class JSONDatabase(Database):
         table: dict = self.__bankdict.get(table_name)
         last_id = 0
         for key in table.keys():
-            last_id = key
+            last_id = int(key)
         return last_id
 
     def select(self, table, id):
@@ -43,7 +43,7 @@ class JSONDatabase(Database):
 
     def insert(self, table, **key_values):
         next_id = self.__get_last_id(table) + 1
-        self.__bankdict[table][next_id] = key_values
+        self.__bankdict[table][str(next_id)] = key_values
         self.__update_bank()
 
     def update(self, table, id, **key_values):
