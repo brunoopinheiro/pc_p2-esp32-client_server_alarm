@@ -14,5 +14,16 @@ login_blueprint = Blueprint('login', __name__)
 def login():
     auth_obj = User(**request.json)
     db = JSONDatabase()
-    db.insert(TABLE_NAME, **asdict(auth_obj))
-    return "ok", HTTPStatus.OK
+    users = db.select_by(TABLE_NAME, 'username', auth_obj.username)
+    for _, user in users.items():
+        if user['password'] == auth_obj.password:
+            return "ok", HTTPStatus.OK
+    return "unauthorized", HTTPStatus.UNAUTHORIZED
+
+
+@login_blueprint.route('/new', methods=["POST"])
+def new_user():
+    user = User(**request.json)
+    db = JSONDatabase()
+    db.insert(TABLE_NAME, **asdict(user))
+    return "ok", HTTPStatus.CREATED

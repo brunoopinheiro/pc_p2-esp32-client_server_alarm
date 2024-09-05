@@ -38,8 +38,9 @@ class JSONDatabase(Database):
     def select_by(self, table, column_name, value):
         table_contents: dict = self.__bankdict.get(table)
         for key, row in table_contents.items():
-            if row.key() == column_name and row.value() == value:
-                return {key: row}
+            for column, cvalue in row.items():
+                if column == column_name and cvalue == value:
+                    return {key: row}
 
     def insert(self, table, **key_values):
         next_id = self.__get_last_id(table) + 1
