@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "pc_p2-esp32-client_server_alarm"
+version = "0.1.0"
+description = ""
+authors = ["Bruno_Pinheiro <bopj@softex.cin.ufpe.br>", "Cinthya Camila <cclc@softex.cin.ufpe.br>", "Douglas Cardins <dvac@softex.cin.ufpe.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+pytest-cov = "^5.0.0"
+taskipy = "^1.13.0"
+ruff = "^0.6.3"
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+preview = true
+select = ['F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = '.'
+addopts = ['-vv', '--cov', '-p no:warnings']
+testpaths = [
+    'tests',
+    'integration',
+]
+
+[tool.taskipy.tasks]
+lint = 'ruff check . && ruff check . --diff'
+format = 'ruff check . --fix && ruff format .'
+test = 'pytest -vv --cov'
+tests_coverage = 'pytest -vv --cov --cov-report=term-missing'
+run = 'python .\src\main.py'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
