@@ -1,9 +1,17 @@
+from __future__ import annotations
 from server.database.abstract_db import Database
 from json import load, dumps
 from pathlib import Path
 
 
 class JSONDatabase(Database):
+
+    __instance = None
+
+    def __new__(cls):
+        if not cls.__instance:
+            cls.__instance = super(JSONDatabase, cls).__new__(cls)
+        return cls.__instance
 
     def __init__(self) -> None:
         self.__basepath = Path(
@@ -33,19 +41,33 @@ class JSONDatabase(Database):
     def select(self, table, id):
         table_contents = self.__bankdict.get(table)
         row = table_contents.get(id)
-        return row
+        result_dict = row.copy()
+        result_dict['id'] = id
+        return result_dict
 
     def select_by(self, table, column_name, value):
         table_contents: dict = self.__bankdict.get(table)
-        for key, row in table_contents.items():
+        result = []
+        for id, row in table_contents.items():
             for column, cvalue in row.items():
                 if column == column_name and cvalue == value:
-                    return {key: row}
+                    result_dict = row.copy()
+                    result_dict['id'] = id
+                    result.append(result_dict)
+        return result
 
     def insert(self, table, **key_values):
         next_id = self.__get_last_id(table) + 1
         self.__bankdict[table][str(next_id)] = key_values
         self.__update_bank()
+        return next_id
+
+    def insert_known_id(self, table, id, **key_values):
+        try:
+            self.__bankdict[table][str(id)] = key_values
+            self.__update_bank()
+        except Exception as err:
+            print("Error: ", err)
 
     def update(self, table, id, **key_values):
         self.__bankdict[table][id] = key_values
