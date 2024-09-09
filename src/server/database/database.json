@@ -1,4 +1,14 @@
 {
+    "failedLogin": {
+        "1": {
+            "attempts": 0,
+            "username": "Developer"
+        },
+        "2": {
+            "attempts": 0,
+            "username": "esp"
+        }
+    },
     "users": {
         "1": {
             "password": "@strongP4ssw0rD",

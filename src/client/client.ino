@@ -24,7 +24,7 @@ enum State {
 
 const char* ssid = "WIFI";
 const char* wifiPassword = "PASSWORD";
-const String serverBaseURL = "IP:PORT";
+const String serverBaseURL = "IP_PORT";
 const String username = "esp";
 const int sensorPin = 2;
 const int buttonPin = 23;

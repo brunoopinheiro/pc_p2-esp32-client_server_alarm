@@ -12,7 +12,7 @@ class Database(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def insert(self, table, **key_values):
+    def insert(self, table, **key_values) -> int:
         raise NotImplementedError
 
     @abstractmethod
