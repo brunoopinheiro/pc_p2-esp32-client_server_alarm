@@ -17,7 +17,8 @@ def login():
     users = db.select_by(TABLE_NAME, 'username', auth_obj.username)
     for _, user in users.items():
         if user['password'] == auth_obj.password:
-            return "ok", HTTPStatus.OK
+            username = user['username']
+            return username, HTTPStatus.OK
     return "unauthorized", HTTPStatus.UNAUTHORIZED
 
 

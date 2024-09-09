@@ -22,10 +22,11 @@ enum State {
   LOCKDOWN = 5,
 };
 
-const char* ssid = "WIFI_NAME";
+const char* ssid = "WIFI";
 const char* wifiPassword = "PASSWORD";
-const String serverBaseURL = "SERVERIP:PORT";
-const int sensorPin = 15;
+const String serverBaseURL = "IP:PORT";
+const String username = "esp";
+const int sensorPin = 2;
 const int buttonPin = 23;
 const int buzzerPin = 14;
 const int touchPin = 4;
@@ -119,9 +120,37 @@ void blinkLed(int time) {
   }
 }
 
+bool authRequest(String inputPassword) {
+  if (WiFi.status() != WL_CONNECTED) {
+    connectWifi();
+  }
+  HTTPClient http;
+  String url = String(serverBaseURL + "/login/");
+  http.begin(url.c_str());
+  http.addHeader("Content-Type", "application/json");
+
+  String payload = String("{\"username\": \"" + username + "\", \"password\": \"" + inputPassword + "\"}");
+  int responseStatus = http.POST(payload);
+  if (responseStatus == 200) {
+    Serial.print("HTTP Response Code: ");
+    Serial.println(responseStatus);
+    String payload = http.getString();
+    Serial.println(payload);
+    http.end();
+    return true;
+  } else {
+    Serial.print("HTTP Response Code: ");
+    Serial.println(responseStatus);
+    http.end();
+    return false;
+  }
+  return false;
+}
+
 void checkPassword(String inputPassword) {
   inputPassword.trim();
-  if (!password.compareTo(inputPassword)) {
+  bool res = authRequest(inputPassword);
+  if (res == true) {
     Serial.println("PASSWORD CORRECT: System Deactivated");
     blinkLed(2);
     state = DEACTIVATED;
@@ -200,7 +229,7 @@ bool touchFeedback() {
 bool sensorFeedback() {
   int sensorValue = analogRead(sensorPin);
   float lightDetectedAmount = map(sensorValue, 0, 1023, 0, 10);
-  if (lightDetectedAmount > 5) {
+  if (lightDetectedAmount > 4) {
     Serial.println("WARNING: Light Detected");
     return true;
   }
