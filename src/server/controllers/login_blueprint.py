@@ -1,8 +1,12 @@
+import os
+from dotenv import load_dotenv
+from datetime import datetime
 from flask import Blueprint, request
 from http import HTTPStatus
 from server.models.user import User
 from dataclasses import asdict
 from server.database.json_db import JSONDatabase
+from server.mail.mail_to import send_mail
 
 
 TABLE_NAME = 'users'
@@ -11,12 +15,30 @@ LOGIN_ATT_TABLE = 'failedLogin'
 login_blueprint = Blueprint('login', __name__)
 
 
+def __send_mail_notification(subject: str, content: str):
+    load_dotenv()
+    MAIL_TO = os.getenv('MAIL_TO')
+    send_mail(
+        emailto=MAIL_TO,
+        subject=subject,
+        text_content=content,
+    )
+
+
 def __update_attempts(id: str, username: str, success=True):
     attempts = 0
     db = JSONDatabase()
     if not success:
         user = db.select_by(LOGIN_ATT_TABLE, 'username', username)[0]
         attempts = int(user['attempts']) + 1
+        if attempts >= 2:
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            content = f"""WARNING: Maximum password retries reached
+            USERNAME: {username}
+            TIME: {dt_string}"""
+            subject = "[ESP32-ALARM] - Password Failed Attempt"
+            __send_mail_notification(subject, content)
     db.update(LOGIN_ATT_TABLE, id, attempts=attempts, username=username)
 
 
