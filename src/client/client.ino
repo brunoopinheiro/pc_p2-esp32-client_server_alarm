@@ -1,4 +1,6 @@
 #include <ESP32Servo.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 #define G 18
 #define F 5
@@ -20,9 +22,13 @@ enum State {
   LOCKDOWN = 5,
 };
 
+const char* ssid = "WIFI_NAME";
+const char* wifiPassword = "PASSWORD";
+const String serverBaseURL = "SERVERIP:PORT";
 const int sensorPin = 15;
 const int buttonPin = 23;
 const int buzzerPin = 14;
+const int touchPin = 4;
 const int ledPin = 21;
 const String password = "senha";
 const int servoLowered = 10;
@@ -44,6 +50,42 @@ int passwordTries = 0;
 Servo servoMotor;
 int servoPos = 0;
 State state;
+
+bool connectWifi() {
+  WiFi.begin(ssid, wifiPassword);
+  Serial.println("WIFI: Connecting...");
+  int count = 0;
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    count += 1;
+    if (count >= 100) {
+      return false;
+    }
+  }
+  Serial.println("");
+  return true;
+}
+
+void checkServer(String serverURL) {
+  if (WiFi.status() != WL_CONNECTED) {
+    connectWifi();
+  }
+  HTTPClient http;
+  http.begin(serverURL.c_str());
+  int responseStatus = http.GET();
+
+  if (responseStatus == 200) {
+    Serial.print("HTTP Response Code: ");
+    Serial.println(responseStatus);
+    String payload = http.getString();
+    Serial.println(payload);
+  } else {
+    Serial.print("HTTP Response Code: ");
+    Serial.println(responseStatus);
+  }
+  http.end();
+}
 
 void writeNumber(int number) {
   bool* display = displayMap[number];
@@ -128,25 +170,37 @@ void beepBuzzer(int repetitions) {
 }
 
 void servoLift() {
+  servoMotor.attach(SERVO_PORT);
   Serial.println("LIFTING LOCK");
   for (servoPos = servoLowered; servoPos <= servoLifted; servoPos +=1) {
     servoMotor.write(servoPos);
     delay(15);
   }
+  servoMotor.detach();
 }
 
 void servoLower() {
+  servoMotor.attach(SERVO_PORT);
   Serial.println("LOWERING LOCK");
   for (servoPos = servoLifted; servoPos >= servoLowered; servoPos -= 1) {
     servoMotor.write(servoPos);
     delay(15);
   }
+  servoMotor.detach();
+}
+
+bool touchFeedback() {
+  int touch = touchRead(touchPin);
+  if (touch <= 10) {
+    return true;
+  }
+  return false;
 }
 
 bool sensorFeedback() {
   int sensorValue = analogRead(sensorPin);
   float lightDetectedAmount = map(sensorValue, 0, 1023, 0, 10);
-  if (lightDetectedAmount > 3) {
+  if (lightDetectedAmount > 5) {
     Serial.println("WARNING: Light Detected");
     return true;
   }
@@ -180,7 +234,8 @@ void activated() {
   digitalWrite(ledPin, LOW);
   turnOffDisplay();
   bool light = sensorFeedback();
-  if (light == true) {
+  bool touch = touchFeedback();
+  if (touch == true || light == true) {
     state = PRE_PASSWORD;
   }
 }
@@ -225,11 +280,12 @@ void setup() {
   pinMode(buzzerPin, OUTPUT);
   pinMode(ledPin, OUTPUT);
   pinMode(buttonPin, INPUT);
-  servoMotor.attach(SERVO_PORT);
   servoLift();
   Serial.begin(115200);
   Serial.println("Starting...");
+  connectWifi();
   blinkLed(2);
+  checkServer(serverBaseURL);
   state = DEACTIVATED;
 }
 
