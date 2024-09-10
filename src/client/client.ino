@@ -22,9 +22,9 @@ enum State {
   LOCKDOWN = 5,
 };
 
-const char* ssid = "WIFI";
-const char* wifiPassword = "PASSWORD";
-const String serverBaseURL = "IP:PORT";
+const char* ssid = "Softex_Conv";
+const char* wifiPassword = "Softex2023";
+const String serverBaseURL = "http://192.168.155.146:8000";
 const String username = "esp";
 const int sensorPin = 13;
 const int buttonPin = 23;
