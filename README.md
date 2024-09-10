@@ -1,6 +1,7 @@
-# pc_p2-esp32-client_server_alarm
-Projeto 2 - ESP32 - Cliente/Servidor - Alarme
+# Projeto 2 - ESP32 - Cliente/Servidor - Alarme
+
 **Disciplina**: Prototipagem de Circuitos
+
 **Integrantes**: Bruno Pinheiro, Cinthya Camila, Douglas Cardins
 
 ## Instalação do Servidor
@@ -30,8 +31,25 @@ e instale as dependências com o comando:
 poetry install
 ```
 
+Siga os passos do tópico [Configuração do `.env`](#configuração-do-env) para configurar o arquivo `.env`.
+
 Por fim, execute o projeto com o comando:
 
 ```shell
 task run
 ```
+
+## Configuração do `.env`
+Seguindo o exemplo do arquivo `.env.example`, crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+- APP_NAME: Nome da aplicação
+- USER_MAIL: E-mail utilizado pelo `ESP32` para envio de e-mails
+- USER_PASSWORD: Senha do e-mail
+- MAIL_TO: E-mail de destino
+
+É importante ressaltar que o servidor está configurado para utilizar o `Gmail` como serviço de envio de e-mails. Caso deseje utilizar outro serviço, é necessário alterar o `SMTP` no arquivo `src/server/mail/mail_to.py`.
+
+## Máquina de Estados
+O ESP32 foi programado para funcionar com uma máquina de estados, seguindo o diagrama abaixo:
+
+![Máquina de Estados](assets/alarme_esp.png)
